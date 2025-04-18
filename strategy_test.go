@@ -2,7 +2,7 @@ package fxtrategy_test
 
 import (
 	"fmt"
-	"github.com/PrettyABoy/fxtrategy"
+	"github.com/real-uangi/fxtrategy"
 	"go.uber.org/fx"
 	"testing"
 )

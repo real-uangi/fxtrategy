@@ -29,7 +29,7 @@ Eng | [中文](README.zh.md)
 
 ## Get Start
 ```shell
-go get github.com/PrettyABoy/fxtrategy@latest
+go get github.com/real-uangi/fxtrategy@latest
 ```
 
 ---
