@@ -36,52 +36,55 @@ go get github.com/real-uangi/fxtrategy@latest
 
 ## Example
 
-### Constructors
-```go
-func newA() fxtrategy.Strategy[Fool] {
-	return fxtrategy.Strategy[Fool]{
-		NS: fxtrategy.NamedStrategy[Fool]{
-			Name: "a",
-			Item: &FoolA{},
-		},
-	}
-}
-```
-
-### Constructors with dependencies
-```go
-func newA(dependencyA any, dependencyB any) fxtrategy.Strategy[Fool] {
-	return fxtrategy.Strategy[Fool]{
-		NS: fxtrategy.NamedStrategy[Fool]{
-			Name: "a",
-			Item: &FoolA{
-				depA: dependencyA,
-				depB: dependencyB,
-            },
-		},
-	}
-}
-```
-
 ### Usage
 ```go
-fx.New(
-    fx.Provide(newA, newB, newC, newD),
-    fx.Provide(fxtrategy.NewContext[Fool]),
-    fx.Provide(fxtrategy.NewContext[Genius]),
+	fx.New(
+		fx.Options(fxtrategy.ProvideItem[Fool](newA, "test")),
+		fx.Options(fxtrategy.ProvideItem[Fool](newB, "test")),
+		fx.Options(fxtrategy.ProvideContext[Fool]("test")),
+		fx.Invoke(func(ctx *fxtrategy.Context[Fool]) {
+			a, _ := ctx.Get("a")
+			a.FoolSpeak()
+			b, _ := ctx.Get("b")
+			b.FoolSpeak()
+		}),
+	)
+```
 
-    fx.Invoke(func(ctx *fxtrategy.Context[Fool]) {
-        a, _ := ctx.Get("a")
-        a.Speak() // Output: i'm a
-        b, _ := ctx.Get("b")
-        b.Speak() // Output: i'm b
-    }),
+### TestSamples
+```go
+type Fool interface {
+	FoolSpeak()
+	fxtrategy.Nameable
+}
 
-    fx.Invoke(func(ctx *fxtrategy.Context[Genius]) {
-        c, _ := ctx.Get("c")
-        c.Speak() // Output: i'm c
-        d, _ := ctx.Get("d")
-        d.Speak() // Output: i'm d
-    }),
-)
+func newA() *FoolA {
+	return &FoolA{}
+}
+
+func newB() *FoolB {
+	return &FoolB{}
+}
+
+type FoolA struct {
+}
+
+func (a *FoolA) FoolSpeak() {
+	fmt.Println("i'm a")
+}
+
+func (a *FoolA) ItemName() string {
+	return "a"
+}
+
+type FoolB struct {
+}
+
+func (b *FoolB) FoolSpeak() {
+	fmt.Println("i'm b")
+}
+
+func (b *FoolB) ItemName() string {
+	return "b"
+}
 ```

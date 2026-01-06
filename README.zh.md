@@ -36,52 +36,55 @@ go get github.com/real-uangi/fxtrategy@latest
 
 ## 示例
 
-### 构造
+### 用法
 ```go
-func newA() fxtrategy.Strategy[Fool] {
-	return fxtrategy.Strategy[Fool]{
-		NS: fxtrategy.NamedStrategy[Fool]{
-			Name: "a",
-			Item: &FoolA{},
-		},
-	}
-}
+	fx.New(
+		fx.Options(fxtrategy.ProvideItem[Fool](newA, "a", "test")),
+		fx.Options(fxtrategy.ProvideItem[Fool](newB, "b", "test")),
+		fx.Options(fxtrategy.ProvideContext[Fool]("test")),
+		fx.Invoke(func(ctx *fxtrategy.Context[Fool]) {
+			a, _ := ctx.Get("a")
+			a.FoolSpeak()
+			b, _ := ctx.Get("b")
+			b.FoolSpeak()
+		}),
+	)
 ```
 
-### 带依赖的构造
+### 测试定义
 ```go
-func newA(dependencyA any, dependencyB any) fxtrategy.Strategy[Fool] {
-	return fxtrategy.Strategy[Fool]{
-		NS: fxtrategy.NamedStrategy[Fool]{
-			Name: "a",
-			Item: &FoolA{
-				depA: dependencyA,
-				depB: dependencyB,
-            },
-		},
-	}
+type Fool interface {
+	FoolSpeak()
+	fxtrategy.Nameable
 }
-```
 
-### 使用
-```go
-fx.New(
-    fx.Provide(newA, newB, newC, newD),
-    fx.Provide(fxtrategy.NewContext[Fool]),
-    fx.Provide(fxtrategy.NewContext[Genius]),
+func newA() *FoolA {
+	return &FoolA{}
+}
 
-    fx.Invoke(func(ctx *fxtrategy.Context[Fool]) {
-        a, _ := ctx.Get("a")
-        a.Speak() // 输出：i'm a
-        b, _ := ctx.Get("b")
-        b.Speak() // 输出：i'm b
-    }),
+func newB() *FoolB {
+	return &FoolB{}
+}
 
-    fx.Invoke(func(ctx *fxtrategy.Context[Genius]) {
-        c, _ := ctx.Get("c")
-        c.Speak() // 输出：i'm c
-        d, _ := ctx.Get("d")
-        d.Speak() // 输出：i'm d
-    }),
-)
+type FoolA struct {
+}
+
+func (a *FoolA) FoolSpeak() {
+	fmt.Println("i'm a")
+}
+
+func (a *FoolA) ItemName() string {
+	return "a"
+}
+
+type FoolB struct {
+}
+
+func (b *FoolB) FoolSpeak() {
+	fmt.Println("i'm b")
+}
+
+func (b *FoolB) ItemName() string {
+	return "b"
+}
 ```
